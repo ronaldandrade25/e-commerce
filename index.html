@@ -6,73 +6,217 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="style.css">
-    <title>E-Commercer</title>
+    <title>E-Commerce</title>
 </head>
 
 <body>
     <header>
-       
-            <div class="logo">
-                <i class="fa-solid fa-bolt"></i>
-                <h1>TechStore</h1>
-            </div>
-
-            <div class="search-container">
-                <input placeholder="Buscar Produto..." class="search-input">
-                <i class="fa-solid fa-magnifying-glass"></i>
-            </div>
-      
+        <div class="logo"> <i class="fa-solid fa-bolt"></i>
+            <h1>TechStore</h1>
+        </div>
+        <div class="search-container"> <input placeholder="Buscar Produto..." class="search-input"> <i
+                class="fa-solid fa-magnifying-glass"></i> </div>
+        <div class="cart-icon"> <i class="fa-solid fa-cart-shopping"></i> <span class="cart-badge">0</span> </div>
     </header>
 
-<div class="categories-container ">
-    <nav class="categories-bar">
-        <button class="category-btn active" data-category="all"> 
-            <i class="fa-solid fa-border-all"></i> 
-            Todos
-        </button>
-        <button class="category-btn" data-category="smartphones"> 
-            <i class="fa-solid fa-mobile-retro"></i>
-            Smartphones
-        </button>
-        <button class="category-btn" data-category="laptops"> 
-            <i class="fa-solid fa-laptop"></i>
-            Notebooks
-        </button>
-        <button class="category-btn" data-category="headphones"> 
-            <i class="fa-solid fa-headphones"></i>
-            Fones 
-        </button>
-        <button class="category-btn" data-category="accessories"> 
-            <i class="fa-solid fa-keyboard"></i>
-            Acessórios
-        </button >
-        <button class="category-btn" data-category="smartwatch">
-            <i class="fa-solid fa-clock"></i>
-            SmartWatch
-        </button>
-    </nav>
-</div>
-
-
-<section class="hero-section">
-    <h2>Black Friday Antecipada</h2>
-    <p> Até 50% de desconto em produtos selecionados</p>
-</section>
-
-
-<main class="products">
-
-    <div class="products-container">
-       
+    <div class="categories-container">
+        <nav class="categories-bar">
+            <button class="category-btn active" data-category="all"><i class="fa-solid fa-border-all"></i>
+                Todos</button>
+            <button class="category-btn" data-category="smartphones"><i class="fa-solid fa-mobile-retro"></i>
+                Smartphones</button>
+            <button class="category-btn" data-category="laptops"><i class="fa-solid fa-laptop"></i> Notebooks</button>
+            <button class="category-btn" data-category="headphones"><i class="fa-solid fa-headphones"></i>
+                Fones</button>
+            <button class="category-btn" data-category="accessories"><i class="fa-solid fa-keyboard"></i>
+                Acessórios</button>
+            <button class="category-btn" data-category="smartwatch"><i class="fa-solid fa-clock"></i>
+                SmartWatch</button>
+        </nav>
     </div>
 
-</main>
+    <section class="hero-section">
+        <h2>Black Friday Antecipada</h2>
+        <p>Até 50% de desconto em produtos selecionados</p>
+    </section>
+
+    <main class="products">
+        <div class="products-container"></div>
+    </main>
+
+    <div class="cart-overlay"></div>
+    <aside class="cart-sidebar">
+        <div class="cart-header">
+            <h3>Meu Carrinho <i class="fa-solid fa-cart-shopping"></i></h3> <button
+                class="close-cart-btn">&times;</button>
+        </div>
+        <div class="cart-body"></div>
+        <div class="cart-footer">
+            <div class="free-shipping-incentive">
+                <p id="shipping-incentive-text">Faltam R$ 250,00 para Frete Grátis!</p>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="shipping-progress-bar"></div>
+                </div>
+            </div>
+            <div class="delivery-options">
+                <h4>Como você quer receber?</h4>
+                <div class="options-toggle">
+                    <button class="delivery-btn active" data-option="delivery"><i class="fa-solid fa-truck-fast"></i>
+                        Entrega</button>
+                    <button class="delivery-btn" data-option="pickup"><i class="fa-solid fa-store"></i>
+                        Retirada</button>
+                </div>
+                <div id="delivery-info" class="delivery-info-content active">
+                    <div class="cep-container"><input type="text" placeholder="Digite seu CEP" class="cep-input"><button
+                            class="cep-btn">Calcular</button></div>
+                    <div class="shipping-options-container"></div>
+                </div>
+                <div id="pickup-info" class="delivery-info-content">
+                    <select class="pickup-select">
+                        <option value="0">Selecione um ponto de retirada</option>
+                        <option value="1">Loja Centro - RJ</option>
+                        <option value="2">Loja Barra da Tijuca - RJ</option>
+                    </select>
+                </div>
+            </div>
+            <div class="coupon-container">
+                <input type="text" id="coupon-input" placeholder="Cupom de desconto">
+                <button id="apply-coupon-btn">Aplicar</button>
+            </div>
+            <p id="coupon-feedback" class="coupon-feedback"></p>
+            <div class="cart-summary">
+                <div class="summary-line"><span>Subtotal</span><span id="cart-subtotal">R$ 0,00</span></div>
+                <div class="summary-line discount-line" style="display: none;"><span>Desconto</span><span
+                        id="cart-discount">- R$ 0,00</span></div>
+                <div class="summary-line"><span>Frete</span><span id="cart-shipping">A calcular</span></div>
+                <div class="summary-line total"><span>Total</span><span id="cart-total">R$ 0,00</span></div>
+            </div>
+            <button class="checkout-btn" disabled>Finalizar Compra</button>
+        </div>
+    </aside>
+
+    <div class="checkout-modal-overlay">
+        <div class="checkout-modal">
+            <div class="checkout-modal-header">
+                <h3>Finalizar Pedido</h3><button class="checkout-modal-close-btn">&times;</button>
+            </div>
+            <div class="checkout-progress-bar">
+                <div class="progress-step active" data-step="1"><span>Entrega</span></div>
+                <div class="progress-step" data-step="2"><span>Pagamento</span></div>
+                <div class="progress-step" data-step="3"><span>Revisão</span></div>
+            </div>
+            <div class="checkout-modal-body">
+                <div class="checkout-step active" data-step="1">
+                    <h4>Informações de Entrega</h4>
+                    <div class="form-group"><label for="name">Nome Completo</label><input type="text" id="name"
+                            required></div>
+                    <div class="form-row">
+                        <div class="form-group"><label for="email">E-mail</label><input type="email" id="email"
+                                required></div>
+                        <div class="form-group"><label for="phone">Celular</label><input type="tel" id="phone" required>
+                        </div>
+                    </div>
+                    <div class="form-group"><label for="address">Endereço</label><input type="text" id="address"
+                            required></div>
+                    <div class="form-row">
+                        <div class="form-group"><label for="number">Número</label><input type="text" id="number"
+                                required></div>
+                        <div class="form-group"><label for="neighborhood">Bairro</label><input type="text"
+                                id="neighborhood" required></div>
+                    </div>
+                </div>
+                <div class="checkout-step" data-step="2">
+                    <h4>Escolha o Método de Pagamento</h4>
+                    <div class="payment-tabs">
+                        <button class="payment-tab active" data-payment="credit-card">Cartão de Crédito</button>
+                        <button class="payment-tab" data-payment="pix">PIX</button>
+                        <button class="payment-tab" data-payment="boleto">Boleto</button>
+                    </div>
+                    <div class="payment-content active" data-payment="credit-card">
+                        <div class="form-group"><label for="card-number">Número do Cartão</label><input type="text"
+                                id="card-number" placeholder="0000 0000 0000 0000" required></div>
+                        <div class="form-group"><label for="card-name">Nome no Cartão</label><input type="text"
+                                id="card-name" required></div>
+                        <div class="form-row">
+                            <div class="form-group"><label for="card-expiry">Validade</label><input type="text"
+                                    id="card-expiry" placeholder="MM/AA" required></div>
+                            <div class="form-group"><label for="card-cvv">CVV</label><input type="text" id="card-cvv"
+                                    placeholder="123" required></div>
+                        </div>
+                    </div>
+                    <div class="payment-content" data-payment="pix">
+                        <div class="pix-content">
+                            <p>Escaneie o QR Code para pagar com PIX:</p><img
+                                src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/QR_code_for_mobile_English_Wikipedia.svg/1200px-QR_code_for_mobile_English_Wikipedia.svg.png"
+                                alt="QR Code PIX">
+                            <p>Ou use o código Copia e Cola:</p>
+                            <div class="pix-code">
+                                00020126330014br.gov.bcb.pix011112345678901235204000053039865802BR5913NOME DO
+                                LOJISTA6008BRASILIA62070503***6304E7C6</div>
+                        </div>
+                    </div>
+                    <div class="payment-content" data-payment="boleto">
+                        <div class="boleto-content"><i class="fas fa-barcode"
+                                style="font-size: 4rem; margin-bottom: 1rem;"></i>
+                            <h4>Boleto Bancário</h4>
+                            <p>O boleto será gerado e enviado para o seu e-mail após a confirmação do pedido.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="checkout-step" data-step="3">
+                    <h4>Revise seu Pedido</h4>
+                    <div class="review-section">
+                        <h5>Entregar Em:</h5>
+                        <p id="review-address"></p>
+                    </div>
+                    <div class="review-section">
+                        <h5>Itens do Pedido:</h5>
+                        <div id="review-items"></div>
+                    </div>
+                    <div class="review-section">
+                        <h5>Resumo do Pagamento:</h5>
+                        <div id="review-summary"></div>
+                    </div>
+                </div>
+                <div class="checkout-step" data-step="4">
+                    <div class="success-content"><i class="fas fa-check-circle"></i>
+                        <h2>Pedido Confirmado!</h2>
+                        <p>Obrigado pela sua compra! Seu pedido <strong id="order-number">#12345</strong> foi recebido
+                            com sucesso.</p>
+                        <p>Enviamos um e-mail de confirmação com todos os detalhes.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="checkout-modal-footer">
+                <div class="checkout-btn-group" data-step="1"><button class="btn-primary"
+                        data-action="next-step">Continuar para Pagamento</button></div>
+                <div class="checkout-btn-group" data-step="2"
+                    style="display: none; width: 100%; justify-content: space-between;"><button class="btn-secondary"
+                        data-action="prev-step">Voltar</button><button class="btn-primary"
+                        data-action="next-step">Revisar Pedido</button></div>
+                <div class="checkout-btn-group" data-step="3"
+                    style="display: none; width: 100%; justify-content: space-between;"><button class="btn-secondary"
+                        data-action="prev-step">Voltar</button><button class="btn-primary"
+                        data-action="confirm-purchase"><i class="fas fa-spinner fa-spin"></i><span>Confirmar
+                            Compra</span></button></div>
+                <div class="checkout-btn-group" data-step="4" style="display: none; width: 100%;"><button
+                        class="btn-primary" data-action="reset" style="width: 100%;">Continuar Comprando</button></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="view-cart-banner">
+        <p>Total: <span id="banner-total">R$ 0,00</span></p>
+        <button class="view-cart-banner-btn">Ver Carrinho</button>
+    </div>
+
+    <footer>
+        <p>2025 - TechStore. Todos os direitos reservados</p>
+    </footer>
 
 
-<footer>
-    <p>2025- TechStore. Todos os direito reservados</p>
-</footer>
 
 </body>
 <script src="./script.js"></script>
+
 </html>
