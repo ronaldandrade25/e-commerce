@@ -51,159 +51,84 @@
                 class="close-cart-btn">&times;</button>
         </div>
         <div class="cart-body"></div>
+
         <div class="cart-footer">
-            <div class="free-shipping-incentive">
-                <p id="shipping-incentive-text">Faltam R$ 250,00 para Frete Grátis!</p>
-                <div class="progress-bar-container">
-                    <div class="progress-bar" id="shipping-progress-bar"></div>
+            <div class="options-toggle">
+                <button class="delivery-btn active" data-option="delivery"><i class="fa-solid fa-truck-fast"></i>
+                    Entrega</button>
+                <button class="delivery-btn" data-option="pickup"><i class="fa-solid fa-store"></i> Retirada</button>
+            </div>
+
+            <div id="delivery-form-container">
+                <div class="form-group"><label for="delivery-name">Seu Nome</label><input type="text" id="delivery-name"
+                        placeholder="Nome e sobrenome" required></div>
+                <div class="form-group"><label for="delivery-phone">Seu Telefone (WhatsApp)</label><input type="tel"
+                        id="delivery-phone" placeholder="(XX) XXXXX-XXXX" maxlength="15" required></div>
+                <div class="form-group"><label for="delivery-cep">CEP</label><input type="text" id="delivery-cep"
+                        placeholder="00000-000" maxlength="9" required></div>
+                <div class="form-group"><label for="delivery-address">Endereço</label><textarea id="delivery-address"
+                        placeholder="Lote, Quadra, Numero" required></textarea>
+                </div>
+                <div class="delivery-fee-notice">A taxa de entrega será calculada de acordo com a sua região.</div>
+
+                <div class="payment-options-container">
+                    <h4>Forma de Pagamento</h4>
+                    <label class="payment-option selected"><input type="radio" name="payment" value="PIX" checked>
+                        PIX</label>
+                    <label class="payment-option"><input type="radio" name="payment" value="Cartão de Crédito"> Cartão
+                        de Crédito</label>
+                    <label class="payment-option"><input type="radio" name="payment" value="Cartão de Débito"> Cartão de
+                        Débito</label>
+                    <label class="payment-option"><input type="radio" name="payment" value="Dinheiro"> Dinheiro</label>
+
+                    <div id="troco-container">
+                        <div class="form-group"><label for="troco-para">Precisa de troco para quanto?</label><input
+                                type="number" id="troco-para" placeholder="Ex: 50"></div>
+                    </div>
                 </div>
             </div>
-            <div class="delivery-options">
-                <h4>Como você quer receber?</h4>
-                <div class="options-toggle">
-                    <button class="delivery-btn active" data-option="delivery"><i class="fa-solid fa-truck-fast"></i>
-                        Entrega</button>
-                    <button class="delivery-btn" data-option="pickup"><i class="fa-solid fa-store"></i>
-                        Retirada</button>
-                </div>
-                <div id="delivery-info" class="delivery-info-content active">
-                    <div class="cep-container"><input type="text" placeholder="Digite seu CEP" class="cep-input"><button
-                            class="cep-btn">Calcular</button></div>
-                    <div class="shipping-options-container"></div>
-                </div>
-                <div id="pickup-info" class="delivery-info-content">
-                    <select class="pickup-select">
-                        <option value="0">Selecione um ponto de retirada</option>
-                        <option value="1">Loja Centro - RJ</option>
-                        <option value="2">Loja Barra da Tijuca - RJ</option>
-                    </select>
+
+            <div id="pickup-form-container" style="display: none;">
+                <div class="form-group"><label for="pickup-name">Nome para Retirada</label><input type="text"
+                        id="pickup-name" placeholder="Digite nome e sobrenome" required></div>
+                <div class="form-group">
+                    <label>Agende a Data e Hora</label>
+                    <div class="date-time-row">
+                        <input type="date" id="pickup-date" required>
+                        <select id="pickup-time" required>
+                            <option value="" disabled selected>Selecione</option>
+                            <option value="08:00">08:00</option>
+                            <option value="09:00">09:00</option>
+                            <option value="10:00">10:00</option>
+                            <option value="11:00">11:00</option>
+                            <option value="12:00">12:00</option>
+                            <option value="13:00">13:00</option>
+                            <option value="14:00">14:00</option>
+                            <option value="15:00">15:00</option>
+                            <option value="16:00">16:00</option>
+                            <option value="17:00">17:00</option>
+                            <option value="18:00">18:00</option>
+                        </select>
+                    </div>
                 </div>
             </div>
-            <div class="coupon-container">
-                <input type="text" id="coupon-input" placeholder="Cupom de desconto">
-                <button id="apply-coupon-btn">Aplicar</button>
-            </div>
+
+            <div class="coupon-container"><input type="text" id="coupon-input" placeholder="Cupom de desconto"><button
+                    id="apply-coupon-btn">Aplicar</button></div>
             <p id="coupon-feedback" class="coupon-feedback"></p>
             <div class="cart-summary">
                 <div class="summary-line"><span>Subtotal</span><span id="cart-subtotal">R$ 0,00</span></div>
                 <div class="summary-line discount-line" style="display: none;"><span>Desconto</span><span
                         id="cart-discount">- R$ 0,00</span></div>
-                <div class="summary-line"><span>Frete</span><span id="cart-shipping">A calcular</span></div>
                 <div class="summary-line total"><span>Total</span><span id="cart-total">R$ 0,00</span></div>
             </div>
-            <button class="checkout-btn" disabled>Finalizar Compra</button>
+        </div>
+
+        <div class="finish-order-btn-container">
+            <button id="finish-order-btn" class="finish-order-btn" disabled><i class="fab fa-whatsapp"></i> Finalizar
+                Pedido</button>
         </div>
     </aside>
-
-    <div class="checkout-modal-overlay">
-        <div class="checkout-modal">
-            <div class="checkout-modal-header">
-                <h3>Finalizar Pedido</h3><button class="checkout-modal-close-btn">&times;</button>
-            </div>
-            <div class="checkout-progress-bar">
-                <div class="progress-step active" data-step="1"><span>Entrega</span></div>
-                <div class="progress-step" data-step="2"><span>Pagamento</span></div>
-                <div class="progress-step" data-step="3"><span>Revisão</span></div>
-            </div>
-            <div class="checkout-modal-body">
-                <div class="checkout-step active" data-step="1">
-                    <h4>Informações de Entrega</h4>
-                    <div class="form-group"><label for="name">Nome Completo</label><input type="text" id="name"
-                            required></div>
-                    <div class="form-row">
-                        <div class="form-group"><label for="email">E-mail</label><input type="email" id="email"
-                                required></div>
-                        <div class="form-group"><label for="phone">Celular</label><input type="tel" id="phone" required>
-                        </div>
-                    </div>
-                    <div class="form-group"><label for="address">Endereço</label><input type="text" id="address"
-                            required></div>
-                    <div class="form-row">
-                        <div class="form-group"><label for="number">Número</label><input type="text" id="number"
-                                required></div>
-                        <div class="form-group"><label for="neighborhood">Bairro</label><input type="text"
-                                id="neighborhood" required></div>
-                    </div>
-                </div>
-                <div class="checkout-step" data-step="2">
-                    <h4>Escolha o Método de Pagamento</h4>
-                    <div class="payment-tabs">
-                        <button class="payment-tab active" data-payment="credit-card">Cartão de Crédito</button>
-                        <button class="payment-tab" data-payment="pix">PIX</button>
-                        <button class="payment-tab" data-payment="boleto">Boleto</button>
-                    </div>
-                    <div class="payment-content active" data-payment="credit-card">
-                        <div class="form-group"><label for="card-number">Número do Cartão</label><input type="text"
-                                id="card-number" placeholder="0000 0000 0000 0000" required></div>
-                        <div class="form-group"><label for="card-name">Nome no Cartão</label><input type="text"
-                                id="card-name" required></div>
-                        <div class="form-row">
-                            <div class="form-group"><label for="card-expiry">Validade</label><input type="text"
-                                    id="card-expiry" placeholder="MM/AA" required></div>
-                            <div class="form-group"><label for="card-cvv">CVV</label><input type="text" id="card-cvv"
-                                    placeholder="123" required></div>
-                        </div>
-                    </div>
-                    <div class="payment-content" data-payment="pix">
-                        <div class="pix-content">
-                            <p>Escaneie o QR Code para pagar com PIX:</p><img
-                                src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/QR_code_for_mobile_English_Wikipedia.svg/1200px-QR_code_for_mobile_English_Wikipedia.svg.png"
-                                alt="QR Code PIX">
-                            <p>Ou use o código Copia e Cola:</p>
-                            <div class="pix-code">
-                                00020126330014br.gov.bcb.pix011112345678901235204000053039865802BR5913NOME DO
-                                LOJISTA6008BRASILIA62070503***6304E7C6</div>
-                        </div>
-                    </div>
-                    <div class="payment-content" data-payment="boleto">
-                        <div class="boleto-content"><i class="fas fa-barcode"
-                                style="font-size: 4rem; margin-bottom: 1rem;"></i>
-                            <h4>Boleto Bancário</h4>
-                            <p>O boleto será gerado e enviado para o seu e-mail após a confirmação do pedido.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="checkout-step" data-step="3">
-                    <h4>Revise seu Pedido</h4>
-                    <div class="review-section">
-                        <h5>Entregar Em:</h5>
-                        <p id="review-address"></p>
-                    </div>
-                    <div class="review-section">
-                        <h5>Itens do Pedido:</h5>
-                        <div id="review-items"></div>
-                    </div>
-                    <div class="review-section">
-                        <h5>Resumo do Pagamento:</h5>
-                        <div id="review-summary"></div>
-                    </div>
-                </div>
-                <div class="checkout-step" data-step="4">
-                    <div class="success-content"><i class="fas fa-check-circle"></i>
-                        <h2>Pedido Confirmado!</h2>
-                        <p>Obrigado pela sua compra! Seu pedido <strong id="order-number">#12345</strong> foi recebido
-                            com sucesso.</p>
-                        <p>Enviamos um e-mail de confirmação com todos os detalhes.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="checkout-modal-footer">
-                <div class="checkout-btn-group" data-step="1"><button class="btn-primary"
-                        data-action="next-step">Continuar para Pagamento</button></div>
-                <div class="checkout-btn-group" data-step="2"
-                    style="display: none; width: 100%; justify-content: space-between;"><button class="btn-secondary"
-                        data-action="prev-step">Voltar</button><button class="btn-primary"
-                        data-action="next-step">Revisar Pedido</button></div>
-                <div class="checkout-btn-group" data-step="3"
-                    style="display: none; width: 100%; justify-content: space-between;"><button class="btn-secondary"
-                        data-action="prev-step">Voltar</button><button class="btn-primary"
-                        data-action="confirm-purchase"><i class="fas fa-spinner fa-spin"></i><span>Confirmar
-                            Compra</span></button></div>
-                <div class="checkout-btn-group" data-step="4" style="display: none; width: 100%;"><button
-                        class="btn-primary" data-action="reset" style="width: 100%;">Continuar Comprando</button></div>
-            </div>
-        </div>
-    </div>
 
     <div class="view-cart-banner">
         <p>Total: <span id="banner-total">R$ 0,00</span></p>

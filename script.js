@@ -1,42 +1,31 @@
 document.addEventListener("DOMContentLoaded", () => {
     // --- SELETORES GLOBAIS ---
-    // Adicionar junto com os outros seletores no início do <script>
-    const viewCartBanner = document.querySelector(".view-cart-banner");
-    const bannerTotalElem = document.getElementById("banner-total");
-    const viewCartBannerBtn = document.querySelector(".view-cart-banner-btn");
-    const containerProdutos = document.querySelector(".products-container");
-    const input = document.querySelector(".search-input");
-    const botoesCategoria = document.querySelectorAll(".category-btn");
     const cartIcon = document.querySelector(".cart-icon"),
         cartSidebar = document.querySelector(".cart-sidebar"),
         cartOverlay = document.querySelector(".cart-overlay"),
         closeCartBtn = document.querySelector(".close-cart-btn"),
         cartBody = document.querySelector(".cart-body"),
-        subtotalElem = document.getElementById("cart-subtotal"),
-        shippingElem = document.getElementById("cart-shipping"),
-        totalElem = document.getElementById("cart-total"),
-        cartBadge = document.querySelector(".cart-badge"),
-        checkoutBtn = document.querySelector(".checkout-btn"),
-        shippingIncentiveText = document.getElementById("shipping-incentive-text"),
-        shippingProgressBar = document.getElementById("shipping-progress-bar"),
-        shippingOptionsContainer = document.querySelector(
-            ".shipping-options-container",
-        ),
-        cepBtn = document.querySelector(".cep-btn"),
-        deliveryToggleBtns = document.querySelectorAll(".delivery-btn"),
-        deliveryInfo = document.getElementById("delivery-info"),
-        pickupInfo = document.getElementById("pickup-info");
-    const checkoutModalOverlay = document.querySelector(
-        ".checkout-modal-overlay",
-    ),
-        checkoutModal = document.querySelector(".checkout-modal"),
-        closeCheckoutModalBtn = document.querySelector(".checkout-modal-close-btn"),
-        cardNumberInput = document.getElementById("card-number");
+        cartBadge = document.querySelector(".cart-badge");
+    const deliveryToggleBtns = document.querySelectorAll(".delivery-btn");
+    const deliveryForm = document.getElementById("delivery-form-container"),
+        pickupForm = document.getElementById("pickup-form-container");
+    const trocoContainer = document.getElementById("troco-container");
     const couponInput = document.getElementById("coupon-input"),
         applyCouponBtn = document.getElementById("apply-coupon-btn"),
-        couponFeedback = document.getElementById("coupon-feedback"),
+        couponFeedback = document.getElementById("coupon-feedback");
+    const subtotalElem = document.getElementById("cart-subtotal"),
         cartDiscountElem = document.getElementById("cart-discount"),
-        discountLineElem = document.querySelector(".discount-line");
+        discountLineElem = document.querySelector(".discount-line"),
+        totalElem = document.getElementById("cart-total");
+    const finishOrderBtn = document.getElementById("finish-order-btn");
+    // Seletores da barra inferior
+    const viewCartBanner = document.querySelector(".view-cart-banner");
+    const bannerTotalElem = document.getElementById("banner-total");
+    const viewCartBannerBtn = document.querySelector(".view-cart-banner-btn");
+
+    // Seletores para o sistema de filtro
+    const categoryBtns = document.querySelectorAll(".category-btn");
+    const searchInput = document.querySelector(".search-input");
 
     // --- ESTADO DA APLICAÇÃO ---
     const produtos = [
@@ -132,31 +121,26 @@ document.addEventListener("DOMContentLoaded", () => {
         },
     ];
     const validCoupons = [{ code: "DESCONTO10", type: "percentage", value: 10 }];
-    let textoPesquisa = "",
-        categoriaAtual = "all",
-        carrinho = [],
-        taxaEntregaSelecionada = null,
+    let carrinho = [],
         tipoEntrega = "delivery",
-        checkoutCurrentStep = 1,
         appliedCoupon = null;
-    const META_FRETE_GRATIS = 250;
+
+    // Variáveis de estado para filtros
+    let categoriaAtiva = "all";
+    let termoBusca = "";
 
     const formatarMoeda = (v) =>
         v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-
-    // --- LÓGICA DE BLOQUEIO DE SCROLL (NOVA) ---
     const getScrollbarWidth = () =>
         window.innerWidth - document.documentElement.clientWidth;
     const lockScroll = () => {
-        const scrollbarWidth = getScrollbarWidth();
-        document.body.style.paddingRight = `${scrollbarWidth}px`;
+        document.body.style.paddingRight = `${getScrollbarWidth()}px`;
         document.body.classList.add("no-scroll");
     };
     const unlockScroll = () => {
         document.body.style.paddingRight = "";
         document.body.classList.remove("no-scroll");
     };
-
     const abrirCarrinho = () => {
         cartSidebar.classList.add("show");
         cartOverlay.classList.add("show");
@@ -188,6 +172,55 @@ document.addEventListener("DOMContentLoaded", () => {
             flyingImg.style.opacity = "0";
         });
         flyingImg.addEventListener("transitionend", () => flyingImg.remove());
+    };
+
+    // Função para filtrar e mostrar produtos
+    const filtrarEMostrarProdutos = () => {
+        let produtosFiltrados = produtos;
+
+        // Filtro por categoria
+        if (categoriaAtiva !== "all") {
+            produtosFiltrados = produtosFiltrados.filter(
+                (produto) => produto.categoria === categoriaAtiva,
+            );
+        }
+
+        // Filtro por busca
+        if (termoBusca.trim() !== "") {
+            const termo = termoBusca.toLowerCase();
+            produtosFiltrados = produtosFiltrados.filter(
+                (produto) =>
+                    produto.nome.toLowerCase().includes(termo) ||
+                    produto.descricao.toLowerCase().includes(termo),
+            );
+        }
+
+        // Renderizar produtos filtrados
+        const container = document.querySelector(".products-container");
+        if (produtosFiltrados.length === 0) {
+            container.innerHTML = `
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: #999;">
+                            <i class="fa-solid fa-box-open" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                            <p style="font-size: 1.2rem; font-weight: 600;">Nenhum produto encontrado</p>
+                        </div>
+                    `;
+        } else {
+            container.innerHTML = produtosFiltrados
+                .map(
+                    (p) => `
+                        <div class="product-card" data-id="${p.id}">
+                            <img class="product-img" src="${p.imagem}" alt="${p.nome}">
+                            <div class="product-info">
+                                <h3 class="product-name">${p.nome}</h3>
+                                <p class="product-description">${p.descricao}</p>
+                                <p class="product-price">${formatarMoeda(p.preco)}</p>
+                                <button class="product-button">Comprar</button>
+                            </div>
+                        </div>
+                    `,
+                )
+                .join("");
+        }
     };
 
     const adicionarAoCarrinho = (produtoId, productCard) => {
@@ -222,7 +255,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 )
                 .join("");
         }
-
         const subtotal = carrinho.reduce(
             (acc, item) => acc + item.preco * item.quantidade,
             0,
@@ -230,11 +262,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let discountAmount = 0;
         if (appliedCoupon && appliedCoupon.type === "percentage")
             discountAmount = subtotal * (appliedCoupon.value / 100);
-
-        const taxaFinal =
-            taxaEntregaSelecionada === null ? 0 : taxaEntregaSelecionada.preco;
-        const total = subtotal - discountAmount + taxaFinal;
-
+        const total = subtotal - discountAmount;
         subtotalElem.textContent = formatarMoeda(subtotal);
         if (discountAmount > 0) {
             cartDiscountElem.textContent = `- ${formatarMoeda(discountAmount)}`;
@@ -242,31 +270,12 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
             discountLineElem.style.display = "none";
         }
-        if (tipoEntrega === "pickup") {
-            shippingElem.textContent = "Grátis";
-        } else {
-            shippingElem.textContent =
-                taxaEntregaSelecionada === null
-                    ? "A calcular"
-                    : formatarMoeda(taxaEntregaSelecionada.preco);
-        }
         totalElem.textContent = formatarMoeda(total);
-
         cartBadge.textContent = carrinho.reduce(
             (acc, item) => acc + item.quantidade,
             0,
         );
-        checkoutBtn.disabled = carrinho.length === 0;
-
-        if (subtotal >= META_FRETE_GRATIS) {
-            shippingIncentiveText.textContent =
-                "Parabéns! Você conseguiu Frete Grátis!";
-            shippingProgressBar.style.width = "100%";
-        } else {
-            const faltante = META_FRETE_GRATIS - subtotal;
-            shippingIncentiveText.textContent = `Faltam ${formatarMoeda(faltante)} para Frete Grátis!`;
-            shippingProgressBar.style.width = `${(subtotal / META_FRETE_GRATIS) * 100}%`;
-        }
+        finishOrderBtn.disabled = carrinho.length === 0;
 
         if (carrinho.length > 0 && window.innerWidth <= 768) {
             bannerTotalElem.textContent = formatarMoeda(total);
@@ -276,243 +285,154 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    const mostrarProdutos = () => {
-        const filtrados = produtos.filter(
-            (p) =>
-                (categoriaAtual === "all" || p.categoria === categoriaAtual) &&
-                p.nome.toLowerCase().includes(textoPesquisa.toLowerCase()),
-        );
-        containerProdutos.innerHTML = filtrados
-            .map(
-                (p) =>
-                    `<div class="product-card" data-id="${p.id}"><img class="product-img" src="${p.imagem}" alt="${p.nome}"><div class="product-info"><h3 class="product-name">${p.nome}</h3><p class="product-description">${p.descricao}</p><p class="product-price">${formatarMoeda(p.preco)}</p><button class="product-button">Comprar</button></div></div>`,
-            )
-            .join("");
-    };
-
-    const calcularFrete = () => {
-        shippingOptionsContainer.innerHTML = `<p style="text-align:center;">Calculando...</p>`;
-        setTimeout(() => {
-            const subtotal = carrinho.reduce(
-                (acc, item) => acc + item.preco * item.quantidade,
-                0,
-            );
-            const opcoes = [
-                { nome: "Padrão", prazo: 7, preco: 15.5 },
-                { nome: "Expressa", prazo: 3, preco: 32.0 },
-            ];
-            if (subtotal >= META_FRETE_GRATIS)
-                opcoes.unshift({ nome: "Grátis (Promocional)", prazo: 7, preco: 0 });
-            shippingOptionsContainer.innerHTML = opcoes
-                .map(
-                    (opt, index) =>
-                        `<div class="shipping-option" data-index="${index}"><span>${opt.nome} (${opt.prazo} dias)</span><span class="price">${opt.preco === 0 ? "Grátis" : formatarMoeda(opt.preco)}</span></div>`,
-                )
-                .join("");
-            document.querySelectorAll(".shipping-option").forEach((optionEl) => {
-                optionEl.addEventListener("click", () => {
-                    document
-                        .querySelectorAll(".shipping-option")
-                        .forEach((el) => el.classList.remove("selected"));
-                    optionEl.classList.add("selected");
-                    taxaEntregaSelecionada =
-                        opcoes[Number.parseInt(optionEl.dataset.index)];
-                    atualizarCarrinho();
-                });
-            });
-        }, 1000);
-    };
-
     const applyCoupon = () => {
         const code = couponInput.value.trim().toUpperCase(),
             foundCoupon = validCoupons.find((c) => c.code === code);
         couponFeedback.classList.remove("success", "error");
         if (foundCoupon) {
             appliedCoupon = foundCoupon;
-            couponFeedback.textContent = "Cupom aplicado com sucesso!";
+            couponFeedback.textContent = "Cupom aplicado!";
             couponFeedback.classList.add("success");
         } else {
             appliedCoupon = null;
-            couponFeedback.textContent = "Cupom inválido ou expirado.";
+            couponFeedback.textContent = "Cupom inválido.";
             couponFeedback.classList.add("error");
         }
         atualizarCarrinho();
     };
 
-    const openCheckoutModal = () => {
-        if (carrinho.length === 0) return;
-        fecharCarrinho();
-        lockScroll();
-        checkoutModalOverlay.style.display = "flex";
-        goToCheckoutStep(1);
-    };
-    const closeCheckoutModal = () => {
-        checkoutModalOverlay.style.display = "none";
-        unlockScroll();
-    };
+    const finalizarPedido = () => {
+        let valid = true;
+        let fieldsToValidate = [];
 
-    const goToCheckoutStep = (step) => {
-        checkoutCurrentStep = step;
-        document
-            .querySelectorAll(".checkout-step")
-            .forEach((el) => el.classList.remove("active"));
-        document
-            .querySelector(`.checkout-step[data-step="${step}"]`)
-            .classList.add("active");
-        document
-            .querySelectorAll(".checkout-btn-group")
-            .forEach((el) => (el.style.display = "none"));
-        document.querySelector(
-            `.checkout-btn-group[data-step="${step}"]`,
-        ).style.display = "flex";
-        document.querySelectorAll(".progress-step").forEach((el, index) => {
-            el.classList.remove("active", "completed");
-            if (index + 1 < step) el.classList.add("completed");
-            if (index + 1 === step) el.classList.add("active");
+        if (tipoEntrega === "delivery") {
+            fieldsToValidate = [
+                "delivery-name",
+                "delivery-phone",
+                "delivery-cep",
+                "delivery-address",
+            ];
+        } else {
+            fieldsToValidate = ["pickup-name", "pickup-date", "pickup-time"];
+        }
+
+        fieldsToValidate.forEach((id) => {
+            const el = document.getElementById(id);
+            let isFieldValid = el.value.trim() !== "";
+
+            if (id.includes("name") && isFieldValid) {
+                if (
+                    el.value
+                        .trim()
+                        .split(" ")
+                        .filter((word) => word).length < 2
+                ) {
+                    isFieldValid = false;
+                }
+            }
+
+            if (!isFieldValid) {
+                el.classList.add("error");
+                valid = false;
+            } else {
+                el.classList.remove("error");
+            }
         });
-        if (step === 3) populateReviewStep();
-    };
 
-    const populateReviewStep = () => {
-        const name = document.getElementById("name").value,
-            address = document.getElementById("address").value,
-            number = document.getElementById("number").value;
-        document.getElementById("review-address").innerHTML =
-            `<strong>${name}</strong><br>${address}, ${number}`;
-        document.getElementById("review-items").innerHTML = carrinho
-            .map(
-                (item) =>
-                    `<p>${item.quantidade}x ${item.nome} - ${formatarMoeda(item.preco * item.quantidade)}</p>`,
-            )
-            .join("");
+        if (!valid) {
+            alert(
+                "Por favor, preencha todos os campos obrigatórios marcados em vermelho.",
+            );
+            return;
+        }
+
+        const numeroWhatsApp = "558182362638";
+        const itensPedido = carrinho
+            .map((item) => `  - ${item.quantidade}x ${item.nome}`)
+            .join("\n");
         const subtotal = carrinho.reduce(
             (acc, item) => acc + item.preco * item.quantidade,
             0,
         );
-        let discountAmount = 0;
-        if (appliedCoupon) discountAmount = subtotal * (appliedCoupon.value / 100);
-        const shipping = taxaEntregaSelecionada?.preco || 0;
-        let summaryHTML = `<p>Subtotal: ${formatarMoeda(subtotal)}</p>`;
-        if (discountAmount > 0)
-            summaryHTML += `<p>Desconto: - ${formatarMoeda(discountAmount)}</p>`;
-        summaryHTML += `<p>Frete: ${formatarMoeda(shipping)}</p><p><strong>Total: ${formatarMoeda(subtotal - discountAmount + shipping)}</strong></p>`;
-        document.getElementById("review-summary").innerHTML = summaryHTML;
-    };
-
-    const formatCardNumber = (e) => {
-        let value = e.target.value.replace(/\D/g, "");
-        value = value.substring(0, 16);
-        const parts = value.match(/.{1,4}/g) || [];
-        e.target.value = parts.join(" ");
-    };
-
-    const validateStep1 = () => {
-        let isValid = true;
-        const inputs = document.querySelectorAll(
-            '.checkout-step[data-step="1"] input[required]',
-        );
-        inputs.forEach((input) => {
-            if (input.value.trim() === "") {
-                input.closest(".form-group").classList.add("error");
-                isValid = false;
-            } else {
-                input.closest(".form-group").classList.remove("error");
-            }
-        });
-        return isValid;
-    };
-
-    const validateStep2 = () => {
-        let isValid = true;
-        const activePayment = document.querySelector(".payment-tab.active").dataset
-            .payment;
-        if (activePayment === "credit-card") {
-            const inputs = document.querySelectorAll(
-                '.payment-content[data-payment="credit-card"] input[required]',
-            );
-            inputs.forEach((input) => {
-                if (input.value.trim() === "") {
-                    input.closest(".form-group").classList.add("error");
-                    isValid = false;
-                } else {
-                    input.closest(".form-group").classList.remove("error");
-                }
-            });
+        let discountAmount = 0,
+            cupomInfo = "";
+        if (appliedCoupon) {
+            discountAmount = subtotal * (appliedCoupon.value / 100);
+            cupomInfo = `\n*Cupom Aplicado:* ${appliedCoupon.code} (${formatarMoeda(discountAmount)})`;
         }
-        return isValid;
-    };
+        const total = subtotal - discountAmount;
+        let mensagem = `*-- NOVO PEDIDO TechStore --*\n\n*Itens:*\n${itensPedido}\n\n*Subtotal:* ${formatarMoeda(subtotal)}${cupomInfo}\n*Total:* ${formatarMoeda(total)}\n\n-------------------------\n\n`;
 
-    const resetApp = () => {
-        carrinho = [];
-        taxaEntregaSelecionada = null;
-        appliedCoupon = null;
-        shippingOptionsContainer.innerHTML = "";
-        couponInput.value = "";
-        couponFeedback.textContent = "";
-        couponFeedback.classList.remove("success", "error");
-        document.querySelector(".cep-input").value = "";
-        [
-            "name",
-            "email",
-            "phone",
-            "address",
-            "number",
-            "neighborhood",
-            "card-number",
-            "card-name",
-            "card-expiry",
-            "card-cvv",
-        ].forEach((id) => (document.getElementById(id).value = ""));
-        atualizarCarrinho();
-        closeCheckoutModal();
+        if (tipoEntrega === "delivery") {
+            const nome = document.getElementById("delivery-name").value;
+            const phone = document.getElementById("delivery-phone").value;
+            const address = document.getElementById("delivery-address").value;
+
+            const paymentMethod = document.querySelector(
+                'input[name="payment"]:checked',
+            ).value;
+            let paymentInfo = `*Forma de Pagamento:* ${paymentMethod}`;
+            if (paymentMethod === "Dinheiro") {
+                const troco = document.getElementById("troco-para").value;
+                paymentInfo += troco
+                    ? ` (Troco para R$ ${troco})`
+                    : " (Não precisa de troco)";
+            }
+            mensagem += `*Tipo de Pedido:* Entrega\n\n*Nome:* ${nome}\n*Telefone:* ${phone}\n*Endereço:* ${address}\n\n${paymentInfo}`;
+        } else {
+            const nome = document.getElementById("pickup-name").value;
+            const dataInput = document.getElementById("pickup-date").value;
+            const hora = document.getElementById("pickup-time").value;
+            const [year, month, day] = dataInput.split("-");
+            const dataFormatada = `${day}/${month}/${year}`;
+
+            mensagem += `*Tipo de Pedido:* Retirada\n\n*Nome para Retirada:* ${nome}\n*Data Agendada:* ${dataFormatada}\n*Hora Agendada:* ${hora}`;
+        }
+
+        const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensagem)}`;
+        window.open(url, "_blank");
     };
 
     // --- EVENT LISTENERS ---
     cartIcon.addEventListener("click", abrirCarrinho);
-    viewCartBannerBtn.addEventListener("click", abrirCarrinho);
     closeCartBtn.addEventListener("click", fecharCarrinho);
     cartOverlay.addEventListener("click", fecharCarrinho);
-    cepBtn.addEventListener("click", calcularFrete);
-    checkoutBtn.addEventListener("click", openCheckoutModal);
-    closeCheckoutModalBtn.addEventListener("click", closeCheckoutModal);
-    cardNumberInput.addEventListener("input", formatCardNumber);
     applyCouponBtn.addEventListener("click", applyCoupon);
-    input.addEventListener("input", (e) => {
-        textoPesquisa = e.target.value;
-        mostrarProdutos();
+    finishOrderBtn.addEventListener("click", finalizarPedido);
+    viewCartBannerBtn.addEventListener("click", abrirCarrinho);
+
+    // Event listener para botões de categoria
+    categoryBtns.forEach((btn) => {
+        btn.addEventListener("click", () => {
+            // Remove classe active de todos os botões
+            categoryBtns.forEach((b) => b.classList.remove("active"));
+            // Adiciona classe active no botão clicado
+            btn.classList.add("active");
+            // Atualiza categoria ativa
+            categoriaAtiva = btn.dataset.category;
+            // Filtra e mostra produtos
+            filtrarEMostrarProdutos();
+        });
     });
 
-    botoesCategoria.forEach((b) =>
-        b.addEventListener("click", () => {
-            categoriaAtual = b.dataset.category;
-            botoesCategoria.forEach((btn) => btn.classList.remove("active"));
-            b.classList.add("active");
-            mostrarProdutos();
-        }),
-    );
-    deliveryToggleBtns.forEach((btn) =>
-        btn.addEventListener("click", () => {
-            deliveryToggleBtns.forEach((b) => b.classList.remove("active"));
-            btn.classList.add("active");
-            tipoEntrega = btn.dataset.option;
-            if (tipoEntrega === "delivery") {
-                deliveryInfo.classList.add("active");
-                pickupInfo.classList.remove("active");
-                taxaEntregaSelecionada = null;
-            } else {
-                deliveryInfo.classList.remove("active");
-                pickupInfo.classList.add("active");
-                taxaEntregaSelecionada = { preco: 0 };
-            }
-            shippingOptionsContainer.innerHTML = "";
-            atualizarCarrinho();
-        }),
-    );
+    // Event listener para campo de busca
+    searchInput.addEventListener("input", (e) => {
+        termoBusca = e.target.value;
+        filtrarEMostrarProdutos();
+    });
 
-    document.body.addEventListener("click", (e) => {
-        const productCard = e.target.closest(".product-card");
-        if (e.target.matches(".product-button") && productCard)
-            adicionarAoCarrinho(Number.parseInt(productCard.dataset.id), productCard);
+    document
+        .querySelector(".products-container")
+        .addEventListener("click", (e) => {
+            if (e.target.matches(".product-button")) {
+                const productCard = e.target.closest(".product-card");
+                adicionarAoCarrinho(
+                    Number.parseInt(productCard.dataset.id),
+                    productCard,
+                );
+            }
+        });
+    cartBody.addEventListener("click", (e) => {
         const cartItem = e.target.closest(".cart-item");
         if (cartItem) {
             const produtoId = Number.parseInt(cartItem.dataset.id);
@@ -525,79 +445,44 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    document.querySelector(".checkout-modal").addEventListener("click", (e) => {
-        const triggerShake = () => {
-            checkoutModal.classList.add("shake");
-            checkoutModal.addEventListener(
-                "animationend",
-                () => checkoutModal.classList.remove("shake"),
-                { once: true },
-            );
-        };
-        if (e.target.dataset.action === "next-step") {
-            if (checkoutCurrentStep === 1) {
-                if (validateStep1()) {
-                    goToCheckoutStep(2);
-                } else {
-                    triggerShake();
-                }
-            } else if (checkoutCurrentStep === 2) {
-                if (validateStep2()) {
-                    goToCheckoutStep(3);
-                } else {
-                    triggerShake();
-                }
+    deliveryToggleBtns.forEach((btn) =>
+        btn.addEventListener("click", () => {
+            deliveryToggleBtns.forEach((b) => b.classList.remove("active"));
+            btn.classList.add("active");
+            tipoEntrega = btn.dataset.option;
+            if (tipoEntrega === "delivery") {
+                deliveryForm.style.display = "block";
+                pickupForm.style.display = "none";
+            } else {
+                deliveryForm.style.display = "none";
+                pickupForm.style.display = "block";
             }
-        }
-        if (e.target.dataset.action === "prev-step") {
-            goToCheckoutStep(checkoutCurrentStep - 1);
-        }
-        if (e.target.dataset.action === "confirm-purchase") {
-            const btn = e.target.closest(".btn-primary");
-            btn.classList.add("loading");
-            btn.disabled = true;
-            setTimeout(() => {
-                document.getElementById("order-number").textContent =
-                    `#${Math.floor(Math.random() * 90000) + 10000}`;
-                goToCheckoutStep(4);
-                btn.classList.remove("loading");
-                btn.disabled = false;
-            }, 2000);
-        }
-        if (e.target.dataset.action === "reset") {
-            resetApp();
-        }
+        }),
+    );
+
+    document.querySelectorAll('input[name="payment"]').forEach((radio) => {
+        radio.addEventListener("change", (e) => {
+            trocoContainer.style.display =
+                e.target.value === "Dinheiro" ? "block" : "none";
+            document
+                .querySelectorAll(".payment-option")
+                .forEach((label) => label.classList.remove("selected"));
+            e.target.closest(".payment-option").classList.add("selected");
+        });
     });
+
+    // Remove o erro ao digitar
     document
-        .querySelectorAll(".checkout-modal input[required]")
+        .querySelectorAll(
+            "#delivery-form-container input[required], #pickup-form-container input[required], #pickup-form-container select[required]",
+        )
         .forEach((input) => {
             input.addEventListener("input", () => {
-                if (input.value.trim() !== "")
-                    input.closest(".form-group").classList.remove("error");
+                if (input.value.trim() !== "") input.classList.remove("error");
             });
         });
-
-    document.querySelectorAll(".payment-tab").forEach((tab) => {
-        tab.addEventListener("click", () => {
-            document
-                .querySelectorAll(".payment-tab")
-                .forEach((t) => t.classList.remove("active"));
-            tab.classList.add("active");
-            const paymentMethod = tab.dataset.payment;
-            document.querySelectorAll(".payment-content").forEach((content) => {
-                content.classList.remove("active");
-                if (content.dataset.payment === paymentMethod)
-                    content.classList.add("active");
-            });
-            document
-                .querySelectorAll(
-                    '.payment-content[data-payment="credit-card"] .form-group.error',
-                )
-                .forEach((el) => el.classList.remove("error"));
-        });
-    });
 
     // --- INICIALIZAÇÃO ---
-    mostrarProdutos();
+    filtrarEMostrarProdutos();
     atualizarCarrinho();
 });
